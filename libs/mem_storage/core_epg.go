@@ -31,12 +31,12 @@ func Epg_GetProvByHash(p uint32) *ProviderEpgData {
 
 // Определяет приоритет поиска по провайдерам, на соснове провайдеров
 // указанных для канала, которые передаются в виде хешей
-func ParseEpg_Channel[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_list []T, look_func func (p uint32)T) []T {
+func ParseEpg_Channel[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_list []T, look_func func (p uint32)T) ([]T, uint8) {
   var err error
   var _hash_epg int
   var hash_epg uint32
 
-  if len(in_h) == 0 { return base_list }
+  if len(in_h) == 0 { return base_list, 0 }
   pdata := bytes.Split(in_h, c_sep_vars)  // "-"
 
   // Создаем с запасом по емкости (для последующей StoreSlice_PrioUser)
@@ -60,15 +60,16 @@ func ParseEpg_Channel[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_lis
     }
   }
 
-  if len(in_list) == 0 {
+  in_list_len := uint8(len(in_list))
+  if in_list_len == 0 {
     // Ничего не нашли, ищем по стандартному порядку
-    return base_list
+    return base_list, 0
   }
-  return Slice_Prioritize(in_list, base_list, base_list_len)
+  return Slice_Prioritize(in_list, base_list, base_list_len), in_list_len
 }
 
 
-func ParseEpg_ReqChannels(in []byte, prov_list []*ProviderEpgData, ctx *fasthttp.RequestCtx) {
+func ParseEpg_ReqChannels(in []byte, prov_list []*ProviderEpgData, ctx *fasthttp.RequestCtx, prov_user_len uint8) {
   if len(in) == 0 { return }
   clist := bytes.Split(in, c_sep_line)  // "\n"
 
@@ -100,13 +101,13 @@ func ParseEpg_ReqChannels(in []byte, prov_list []*ProviderEpgData, ctx *fasthttp
     cdata = bytes.Split(clist[i], c_sep_array)  // "~" - делим данные канала и его epg
     if len(cdata) == 2 {
       // Приоритизируем пользовательские источники
-      providers = ParseEpg_Channel(cdata[1], prov_list, Epg_GetProvByHash)
+      providers, prov_user_len = ParseEpg_Channel(cdata[1], prov_list, Epg_GetProvByHash)
     } else {
       // Используем общий список
       providers = prov_list
     }
 
-    ch_key, ch_data, ch_prov = ParseEpg_LookupChannel(cdata[0], providers)
+    ch_key, ch_data, ch_prov = ParseEpg_LookupChannel(cdata[0], providers, prov_user_len)
     if ch_data != nil {
       // Пишем данные о канале
       mini_buf = mini_buf[:0] // Сброс буфера

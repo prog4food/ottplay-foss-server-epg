@@ -27,9 +27,9 @@ func EpgMatch(ctx *fasthttp.RequestCtx) {
   // TODO: обработка метаданных из req_parts[1]
   ms.Lock.RLock()
   defer ms.Lock.RUnlock()
-  _m3u_providers := ms.PrioritizeUserProviders(req_parts[1], ms.PO.Epg, ms.Epg_GetProvByHash)
+  _m3u_providers, prov_user_len := ms.PrioritizeUserProviders(req_parts[1], ms.PO.Epg, ms.Epg_GetProvByHash)
   if len(_m3u_providers) == 0 { fastHTTPError(ctx, 503,); return }
-  ms.ParseEpg_ReqChannels(req_parts[2], _m3u_providers, ctx)
+  ms.ParseEpg_ReqChannels(req_parts[2], _m3u_providers, ctx, prov_user_len)
 }
 
 
@@ -44,7 +44,7 @@ func IcoMatch(ctx *fasthttp.RequestCtx) {
   // TODO: обработка метаданных из req_parts[1]
   ms.Lock.RLock()
   defer ms.Lock.RUnlock()
-  _m3u_providers := ms.PrioritizeUserProviders(req_parts[1], ms.PO.Ico, ms.Ico_GetProvByHash)
+  _m3u_providers, prov_user_len := ms.PrioritizeUserProviders(req_parts[1], ms.PO.Ico, ms.Ico_GetProvByHash)
   if len(_m3u_providers) == 0 { fastHTTPError(ctx, 503,); return }
-  ms.ParseIco_ReqChannels(req_parts[2], _m3u_providers, ctx)
+  ms.ParseIco_ReqChannels(req_parts[2], _m3u_providers, ctx, prov_user_len)
 }

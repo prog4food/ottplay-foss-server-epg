@@ -79,10 +79,10 @@ func Slice_AppendUniq[T *ProviderEpgData|*ProviderIcoData](uniq_store []T, new_e
 
 
 // Дженерик сканирует блок с ссылками на XMLTV и переводит их в
-func PrioritizeUserProviders[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_list []T, look_func func (p uint32)T) []T {
+func PrioritizeUserProviders[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_list []T, look_func func (p uint32)T) ([]T, uint8) {
   var hash_epg uint32
 
-  if len(in_h) == 0 { return base_list }
+  if len(in_h) == 0 { return base_list, 0 }
   pdata := bytes.Split(in_h, c_sep_line)  // "\n"
 
   // Создаем с запасом по емкости (для последующей StoreSlice_PrioUser)
@@ -104,9 +104,10 @@ func PrioritizeUserProviders[T *ProviderEpgData|*ProviderIcoData](in_h []byte, b
     }
   }
 
-  if len(in_list) == 0 {
-  // Ничего не нашли, ищем по стандартному порядку
-  return base_list
+  in_list_len := uint8(len(in_list))
+  if in_list_len == 0 {
+    // Ничего не нашли, ищем по стандартному порядку
+    return base_list, 0
   }
-  return Slice_Prioritize(in_list, base_list, base_list_len)
+  return Slice_Prioritize(in_list, base_list, base_list_len), in_list_len
 }

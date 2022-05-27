@@ -15,7 +15,7 @@ func Ico_GetProvByHash(p uint32) *ProviderIcoData {
 }
 
 
-func ParseIco_ReqChannels(in []byte, prov_list []*ProviderIcoData, ctx *fasthttp.RequestCtx) {
+func ParseIco_ReqChannels(in []byte, prov_list []*ProviderIcoData, ctx *fasthttp.RequestCtx, prov_user_len uint8) {
   if len(in) == 0 { return }
   clist := bytes.Split(in, c_sep_line)  // "\n"
 
@@ -43,13 +43,13 @@ func ParseIco_ReqChannels(in []byte, prov_list []*ProviderIcoData, ctx *fasthttp
     cdata = bytes.Split(clist[i], c_sep_array)  // "~" - делим данные канала и его epg
     if len(cdata) == 2 {
       // Приоритизируем пользовательские источники
-      providers = ParseEpg_Channel(cdata[1], prov_list, Ico_GetProvByHash)
+      providers, prov_user_len = ParseEpg_Channel(cdata[1], prov_list, Ico_GetProvByHash)
     } else {
       // Используем общий список
       providers = prov_list
     }
 
-    ch_key, ch_data, _ = ParseIco_LookupChannel(cdata[0], providers)
+    ch_key, ch_data, _ = ParseIco_LookupChannel(cdata[0], providers, prov_user_len)
     if ch_data != nil {
       // Пишем данные о канале
       mini_buf = mini_buf[:0] // Сброс буфера

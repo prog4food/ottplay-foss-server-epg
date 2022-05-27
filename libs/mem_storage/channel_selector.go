@@ -8,7 +8,7 @@ import (
 )
 
 
-func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData) ([]byte, *EpgChannelData, *ProviderEpgData) {
+func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_len uint8) ([]byte, *EpgChannelData, *ProviderEpgData) {
   var (
     ok bool
     err error
@@ -20,8 +20,11 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData) ([]byte, *E
     search_state int = 0
   )
 
-  // Ordered будеть лежать в другом блоке памяти, удобно :)
-  std_prov := (&prov_list[0] == &PO.Epg[0])
+  // Ordered будет лежать в другом блоке памяти, удобно :)
+  // UPD: Не актуально, но пусть будет
+  //      тк, передаем prov_user_len, показывающий "границу" предпочтительных источников
+  //std_prov := (&prov_list[0] == &PO.Epg[0])
+
 
   cdata := bytes.Split(in, c_sep_vars)  // "-"
 
@@ -40,9 +43,9 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData) ([]byte, *E
       if err != nil { goto err_bye }
       ch_name = uint32(_t)
 
-  if (!std_prov) && (ch_tid != 0) {
+  if (ch_tid != 0) && (prov_user_len > 0) {
     // Если список "кастомный", и есть tvg-id
-    for i := 0; i < len(prov_list); i++ {
+    for i := 0; i < int(prov_user_len); i++ {
       prov = prov_list[i]
       ch, ok = prov.ById[ch_tid]
       if ok { search_state = 1; goto exit_ok }
@@ -79,7 +82,7 @@ err_bye:
 }
 
 
-func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData) ([]byte, *string, *ProviderIcoData) {
+func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData, prov_user_len uint8) ([]byte, *string, *ProviderIcoData) {
   var (
     ok bool
     err error
@@ -91,8 +94,10 @@ func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData) ([]byte, *s
     search_state int = 0
   )
 
-  // Ordered будеть лежать в другом блоке памяти, удобно :)
-  std_prov := (&prov_list[0] == &PO.Ico[0])
+  // Ordered будет лежать в другом блоке памяти, удобно :)
+  // UPD: Не актуально, но пусть будет
+  //      тк, передаем prov_user_len, показывающий "границу" предпочтительных источников
+  //std_prov := (&prov_list[0] == &PO.Epg[0])
 
   cdata := bytes.Split(in, c_sep_vars)  // "-"
 
@@ -111,9 +116,9 @@ func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData) ([]byte, *s
       if err != nil { goto err_bye }
       ch_name = uint32(_t)
 
-  if (!std_prov) && (ch_tid != 0) {
+  if (ch_tid != 0) && (prov_user_len > 0) {
     // Если список "кастомный", и есть tvg-id
-    for i := 0; i < len(prov_list); i++ {
+    for i := 0; i < int(prov_user_len); i++ {
       prov = prov_list[i]
       ch, ok = prov.ById[ch_tid]
       if ok { search_state = 1; goto exit_ok }
