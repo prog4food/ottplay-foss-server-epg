@@ -21,6 +21,10 @@ func Load() {
     log.Err(err).Send()
   }
 
+  if ConfigData.Bind == "" {
+    ConfigData.Bind = "127.0.0.1:3001"
+  }
+
   // Параметры по-умолчанию
   for i := 0; i < len(ConfigData.Providers); i++ {
     p := &ConfigData.Providers[i] 
@@ -34,6 +38,5 @@ func Load() {
 
     if p.OrderEpg == 0 { p.OrderEpg = _default_order }
     if p.OrderIco == 0 { p.OrderIco = _default_order }
-    
   }
 }
