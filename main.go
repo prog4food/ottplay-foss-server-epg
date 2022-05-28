@@ -60,5 +60,5 @@ func main() {
     }
   }
 
-  fasthttp.ListenAndServe(":3001", m)
+  fasthttp.ListenAndServe(config_epg.ConfigData.Bind, m)
 }
