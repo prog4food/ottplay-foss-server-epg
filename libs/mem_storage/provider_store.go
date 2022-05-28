@@ -18,16 +18,16 @@ type HashEpgStruct map[uint32]*EpgChannelData
 type ProviderEpgData struct {
   ById        HashEpgStruct
   ByName      HashEpgStruct
-  Order       uint8
+  Order       uint16
   UrlBase    *string
   UrlBaseS   *string
   Outdated    uint32
   Prov       *ProviderElement
 }
-func (m ProviderEpgData) GetOrder() uint8 { return m.Order }
+func (m ProviderEpgData) GetOrder() uint16 { return m.Order }
 type StoreTypes interface {
   *ProviderEpgData | *ProviderIcoData
-  GetOrder() uint8
+  GetOrder() uint16
 }
 
 // Хранилище провайдера Ico
@@ -35,10 +35,10 @@ type HashIcoStruct map[uint32]*string
 type ProviderIcoData struct {
   ById    HashIcoStruct
   ByName  HashIcoStruct
-  Order   uint8
+  Order   uint16
   Prov   *ProviderElement
 }
-func (m ProviderIcoData) GetOrder() uint8 { return m.Order }
+func (m ProviderIcoData) GetOrder() uint16 { return m.Order }
 
 // Единица хранилища провайдера
 type ProviderElement struct {

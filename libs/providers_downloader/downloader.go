@@ -114,8 +114,15 @@ func processProvider(ps *config_epg.ProviderSource, b []byte) {
 }
 
 func DownloadProvider(p *config_epg.ProviderSource) {
+  var _url string
+  if p.UrlBase != "" { _url = p.UrlBase
+  } else if p.UrlBaseS != "" { _url = p.UrlBaseS
+  } else {
+    log.Error().Msgf("cannot find provider url [%s]", p.IdName)
+    return
+  }
   req  := fasthttp.AcquireRequest()
-  req.SetRequestURI(p.UrlBase + "channels.json")
+  req.SetRequestURI(_url + "channels.json")
   req.Header.SetMethod(fasthttp.MethodGet)
   resp := fasthttp.AcquireResponse()
   err  := HttpClient.DoRedirects(req, resp, 3)
@@ -123,7 +130,7 @@ func DownloadProvider(p *config_epg.ProviderSource) {
   if (err == nil) && (resp.StatusCode() == fasthttp.StatusOK) {
     processProvider(p, resp.Body())
   } else {
-    log.Error().Err(err).Msgf("cannot download channels for '%s' [status: %d, url: %s]", p.IdName, resp.StatusCode(), p.UrlBase)
+    log.Error().Err(err).Msgf("cannot download channels for '%s' [status: %d, url: %s]", p.IdName, resp.StatusCode(), _url)
   }
   fasthttp.ReleaseResponse(resp)
 }
