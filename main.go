@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	_ "net/http/pprof"
 	"os"
 
@@ -19,6 +20,7 @@ var depl_ver string
 
 var (
   c_byte_wild = []byte{'*'}
+  c_byte_static_dir = []byte("/html/")
 )
 
 func fastHTTPError(ctx *fasthttp.RequestCtx, ecode int) {
@@ -40,6 +42,16 @@ func main() {
   config_epg.Load()
   go providers_downloader.StartJob()
 
+
+  // Локальный хостинг для EPG
+  fs := &fasthttp.FS{
+    IndexNames:         []string{"index.html"},
+    GenerateIndexPages: true,
+    Compress:           true,
+  }
+  html_handler := fs.NewRequestHandler()
+
+
   // the corresponding fasthttp code
   m := func(ctx *fasthttp.RequestCtx) {
     switch string(ctx.Path()) {
@@ -56,7 +68,13 @@ func main() {
       //TODO: backward compability
       //TODO: backward compability
     default:
-      ctx.Error("not found", fasthttp.StatusNotFound)
+      // local hosting?
+      if bytes.HasPrefix(ctx.Path(), c_byte_static_dir) {
+        html_handler(ctx)
+        AllowCors(ctx)
+      } else {
+        ctx.Error("not found", fasthttp.StatusNotFound)
+      }
     }
   }
 

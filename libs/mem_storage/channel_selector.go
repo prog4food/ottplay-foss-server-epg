@@ -17,7 +17,7 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
     ch_tid, ch_tname, ch_name uint32
     ch   *EpgChannelData
     prov *ProviderEpgData
-    search_state int = 0
+    search_step int = 0
   )
 
   // Ordered будет лежать в другом блоке памяти, удобно :)
@@ -48,7 +48,7 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
     for i := 0; i < int(prov_user_len); i++ {
       prov = prov_list[i]
       ch, ok = prov.ById[ch_tid]
-      if ok { search_state = 1; goto exit_ok }
+      if ok { search_step = 1; goto exit_ok }
     }
   }
   if (ch_tname != 0) {
@@ -56,7 +56,7 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
     for i := 0; i < len(prov_list); i++ {
       prov = prov_list[i]
       ch, ok = prov.ByName[ch_tname]
-      if ok { search_state = 2; goto exit_ok }
+      if ok && !ch.ExpiredEpg { search_step = 2; goto exit_ok }
     }
   }
   if (ch_name != 0) {
@@ -64,15 +64,14 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
     for i := 0; i < len(prov_list); i++ {
       prov = prov_list[i]
       ch, ok = prov.ByName[ch_name]
-      if ok { search_state = 3; goto exit_ok }
+      if ok && !ch.ExpiredEpg { search_step = 3; goto exit_ok }
     }
   }
   // if (ch_tid != 0) {
   // // Если мы тут, то ничего не осталось, как сверить tvg-id (пока пусть будет TODO)
   // }
   // log.Printf("EPG.NOT_FOUND: %s", ch_key);
-  _ = search_state
-  return ch_key, nil, nil
+  _ = search_step
 exit_ok:
   // log.Printf("EPG.FOUND: %s -- %s sate: %d", ch_key, ch.IdHash, search_state);
   return ch_key, ch, prov
