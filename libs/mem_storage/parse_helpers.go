@@ -90,8 +90,8 @@ func PrioritizeUserProviders[T *ProviderEpgData|*ProviderIcoData](in_h []byte, b
   in_list := make([]T, 0, base_list_len) 
   for i := 0; i < len(pdata); i++ {
     if len(pdata) == 0 { continue }
-    url_lower := bytes.ToLower(pdata[i])
-    hash_epg = xxhash.Checksum32(url_lower)
+    url := pdata[i]
+    hash_epg = xxhash.Checksum32(url)
 
     // Проверяем, знаем ли такого провайдера
     _prov := look_func(hash_epg)
