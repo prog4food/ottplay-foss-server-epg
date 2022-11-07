@@ -1,10 +1,8 @@
 package helpers
 
 import (
-	"unsafe"
-
-	"github.com/rs/zerolog/log"
-	"github.com/valyala/fasthttp"
+  "unsafe"
+  "errors"
 )
 
 func B2s(b []byte) string {
@@ -12,13 +10,40 @@ func B2s(b []byte) string {
   return *(*string)(unsafe.Pointer(&b))
 }
 
-func ParseUint32(in []byte, err_note string) uint32 {
-  _t, err := fasthttp.ParseUint(in)
-  if err != nil {
-    log.Err(err).Msg(err_note + ": cannot parse var %s" + B2s(in))
-    return 0
+
+// Based on fasthttp.ParseUint (original has bug: read only 31 bit)
+var (
+  ErrEmptyInt               = errors.New("empty integer")
+  ErrUnexpectedFirstChar    = errors.New("unexpected first char found. Expecting 0-9")
+  ErrUnexpectedTrailingChar = errors.New("unexpected trailing char found. Expecting 0-9")
+  ErrTooLongInt             = errors.New("too long int")
+)
+func ParseUint32Buf(b []byte) (uint32, int, error) {
+  n := len(b)
+  if n == 0 {
+    return 0, 0, ErrEmptyInt
   }
-  return uint32(_t)
+  var (
+    v, vNew uint32
+    k byte
+  )
+  for i := 0; i < n; i++ {
+    k = b[i] - '0'
+    if k > 9 {
+      if i == 0 {
+        return 0, i, ErrUnexpectedFirstChar
+      } else {
+        return v, i, ErrUnexpectedTrailingChar
+      }
+    }
+    vNew = 10*v + uint32(k)
+    // Test for overflow.
+    if vNew < v {
+      return 0, i, ErrTooLongInt
+    }
+    v = vNew
+  }
+  return v, n, nil
 }
 
 func AppendUint(dst []byte, n uint32) []byte {

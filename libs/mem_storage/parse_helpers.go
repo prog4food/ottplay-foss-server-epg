@@ -2,7 +2,6 @@ package mem_storage
 
 import (
 	"bytes"
-	"unsafe"
 
 	"github.com/OneOfOne/xxhash"
 	"github.com/rs/zerolog/log"
@@ -30,13 +29,6 @@ func SliceExistUint32(slice []uint32, val uint32) bool {
   }
   return false
 }
-
-
-func b2s(b []byte) string {
-  /* #nosec G103 */
-  return *(*string)(unsafe.Pointer(&b))
-}
-
 
 // Пересортирует список так, что пользовательские записи будут первыми
 func Slice_Prioritize[T *ProviderEpgData|*ProviderIcoData](user_prio []T, global_list []T, global_len int) []T {

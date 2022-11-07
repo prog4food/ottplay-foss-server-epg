@@ -36,8 +36,6 @@ func easyjson6a975c40DecodeOttplayFossServerEpgLibsProvidersDownloader(in *jlexe
 			continue
 		}
 		switch key {
-		case "meta":
-			easyjson6a975c40DecodeOttplayFossServerEpgLibsProvidersDownloader1(in, &out.Meta)
 		case "data":
 			if in.IsNull() {
 				in.Skip()
@@ -75,6 +73,8 @@ func easyjson6a975c40DecodeOttplayFossServerEpgLibsProvidersDownloader(in *jlexe
 				}
 				in.Delim('}')
 			}
+		case "meta":
+			easyjson6a975c40DecodeOttplayFossServerEpgLibsProvidersDownloader1(in, &out.Meta)
 		default:
 			in.SkipRecursive()
 		}
@@ -90,13 +90,8 @@ func easyjson6a975c40EncodeOttplayFossServerEpgLibsProvidersDownloader(out *jwri
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"meta\":"
-		out.RawString(prefix[1:])
-		easyjson6a975c40EncodeOttplayFossServerEpgLibsProvidersDownloader1(out, in.Meta)
-	}
-	{
 		const prefix string = ",\"data\":"
-		out.RawString(prefix)
+		out.RawString(prefix[1:])
 		if in.Data == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
@@ -125,6 +120,11 @@ func easyjson6a975c40EncodeOttplayFossServerEpgLibsProvidersDownloader(out *jwri
 			}
 			out.RawByte('}')
 		}
+	}
+	{
+		const prefix string = ",\"meta\":"
+		out.RawString(prefix)
+		easyjson6a975c40EncodeOttplayFossServerEpgLibsProvidersDownloader1(out, in.Meta)
 	}
 	out.RawByte('}')
 }

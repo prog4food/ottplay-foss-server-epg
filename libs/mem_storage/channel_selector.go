@@ -4,7 +4,8 @@ import (
 	"bytes"
 
 	"github.com/rs/zerolog/log"
-	"github.com/valyala/fasthttp"
+  
+	"ottplay-foss-server-epg/libs/helpers"
 )
 
 
@@ -12,9 +13,8 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
   var (
     ok bool
     err error
-    _t int
     ch_key []byte
-    ch_tid, ch_tname, ch_name uint32
+    _ch_key, ch_tid, ch_tname, ch_name uint32
     ch   *EpgChannelData
     prov *ProviderEpgData
     search_step int = 0
@@ -29,19 +29,15 @@ func ParseEpg_LookupChannel(in []byte, prov_list []*ProviderEpgData, prov_user_l
   cdata := bytes.Split(in, c_sep_vars)  // "-"
 
   if len(cdata) != 4 { goto err_bye }
-    _t, err = fasthttp.ParseUint(cdata[0])
-      if err != nil { goto err_bye }
-      if _t == 0 { goto err_bye }
+    _ch_key, _, err = helpers.ParseUint32Buf(cdata[0])
+      if (err != nil) || (_ch_key == 0) { goto err_bye }
       ch_key = cdata[0]
-    _t, err = fasthttp.ParseUint(cdata[1])
+    ch_tid, _, err = helpers.ParseUint32Buf(cdata[1])
       if err != nil { goto err_bye }
-      ch_tid = uint32(_t)
-    _t, err = fasthttp.ParseUint(cdata[2])
+    ch_tname, _, err = helpers.ParseUint32Buf(cdata[2])
       if err != nil { goto err_bye }
-      ch_tname = uint32(_t)
-    _t, err = fasthttp.ParseUint(cdata[3])
+    ch_name, _, err = helpers.ParseUint32Buf(cdata[3])
       if err != nil { goto err_bye }
-      ch_name = uint32(_t)
 
   if (ch_tid != 0) && (prov_user_len > 0) {
     // Если список "кастомный", и есть tvg-id
@@ -76,7 +72,7 @@ exit_ok:
   // log.Printf("EPG.FOUND: %s -- %s sate: %d", ch_key, ch.IdHash, search_state);
   return ch_key, ch, prov
 err_bye:
-  log.Err(err).Msgf("match-channels.epg: cannot parse channel data %s", b2s(in))
+  log.Err(err).Msgf("match-channels.epg: cannot parse channel data %s", helpers.B2s(in))
   return nil, nil, nil
 }
 
@@ -85,9 +81,8 @@ func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData, prov_user_l
   var (
     ok bool
     err error
-    _t int
     ch_key []byte
-    ch_tid, ch_tname, ch_name uint32
+    _ch_key, ch_tid, ch_tname, ch_name uint32
     ch   *string
     prov *ProviderIcoData
     search_state int = 0
@@ -101,19 +96,15 @@ func ParseIco_LookupChannel(in []byte, prov_list []*ProviderIcoData, prov_user_l
   cdata := bytes.Split(in, c_sep_vars)  // "-"
 
   if len(cdata) != 4 { goto err_bye }
-    _t, err = fasthttp.ParseUint(cdata[0])
-      if err != nil { goto err_bye }
-      if _t == 0 { goto err_bye }
+    _ch_key, _, err = helpers.ParseUint32Buf(cdata[0])
+      if (err != nil) || (_ch_key == 0) { goto err_bye }
       ch_key = cdata[0]
-    _t, err = fasthttp.ParseUint(cdata[1])
+    ch_tid, _, err = helpers.ParseUint32Buf(cdata[1])
       if err != nil { goto err_bye }
-      ch_tid = uint32(_t)
-    _t, err = fasthttp.ParseUint(cdata[2])
+    ch_tname, _, err = helpers.ParseUint32Buf(cdata[2])
       if err != nil { goto err_bye }
-      ch_tname = uint32(_t)
-    _t, err = fasthttp.ParseUint(cdata[3])
+    ch_name, _, err = helpers.ParseUint32Buf(cdata[3])
       if err != nil { goto err_bye }
-      ch_name = uint32(_t)
 
   if (ch_tid != 0) && (prov_user_len > 0) {
     // Если список "кастомный", и есть tvg-id
@@ -149,6 +140,6 @@ exit_ok:
   // log.Printf("ICO.FOUND: %s -- sate: %d", ch_key, search_state);
   return ch_key, ch, prov
 err_bye:
-  log.Err(err).Msgf("match-channels.ico: cannot parse channel data %s", b2s(in))
+  log.Err(err).Msgf("match-channels.ico: cannot parse channel data %s", helpers.B2s(in))
   return nil, nil, nil
 }

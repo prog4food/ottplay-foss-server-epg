@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
-	_ "net/http/pprof"
+	"io"
 	"os"
+	"runtime"
 
+	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/valyala/fasthttp"
@@ -15,8 +17,7 @@ import (
 )
 
 // Устанавливаются при сборке
-var depl_ver string
-
+var depl_ver = "[devel]"
 
 var (
   c_byte_wild = []byte{'*'}
@@ -32,12 +33,18 @@ func AllowCors(ctx *fasthttp.RequestCtx) {
 }
 
 func main() {
+  var sOut io.Writer
+
+  // Фикс цветной консоли для Windows
+  if runtime.GOOS == "windows" {
+    sOut = colorable.NewColorableStdout()
+  } else {
+    sOut = os.Stdout }
   //zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-  log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02T15:04:05", NoColor: true})
+  log.Logger = log.Output(zerolog.ConsoleWriter{Out: sOut, TimeFormat: "2006-01-02T15:04:05"})
   //f_client.InitClient()
   log.Info().Msg("OTT-play FOSS server (EPG) " + depl_ver)
   log.Info().Msg("  git@prog4food (c) 2o22")
-
   // Загрузка конфигурации
   config_epg.Load()
   go providers_downloader.StartJob()
@@ -50,7 +57,6 @@ func main() {
     Compress:           true,
   }
   html_handler := fs.NewRequestHandler()
-
 
   // the corresponding fasthttp code
   m := func(ctx *fasthttp.RequestCtx) {

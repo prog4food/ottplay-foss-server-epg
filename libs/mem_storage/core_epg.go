@@ -5,6 +5,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/valyala/fasthttp"
+
+	"ottplay-foss-server-epg/libs/helpers"
 )
 
 var (
@@ -33,7 +35,6 @@ func Epg_GetProvByHash(p uint32) *ProviderEpgData {
 // указанных для канала, которые передаются в виде хешей
 func ParseEpg_Channel[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_list []T, look_func func (p uint32)T) ([]T, uint8) {
   var err error
-  var _hash_epg int
   var hash_epg uint32
 
   if len(in_h) == 0 { return base_list, 0 }
@@ -43,11 +44,11 @@ func ParseEpg_Channel[T *ProviderEpgData|*ProviderIcoData](in_h []byte, base_lis
   base_list_len := len(base_list)
   in_list := make([]T, 0, base_list_len) 
   for i := 0; i < len(pdata); i++ {
-    _hash_epg, err = fasthttp.ParseUint(pdata[i])
+    hash_epg, _, err = helpers.ParseUint32Buf(pdata[i])
     if err != nil {
-      log.Err(err).Msgf("match-channels.epg: cannot parse var %s", b2s(pdata[i]))
+      log.Err(err).Msgf("match-channels.epg: cannot parse var %s", helpers.B2s(pdata[i]))
       continue
-    }; hash_epg = uint32(_hash_epg)
+    }
 
     // Проверяем, знаем ли такого провайдера
     _prov := look_func(hash_epg)

@@ -2,7 +2,7 @@
 BIN_NAME="ofoss-epg-serv"
 BIN_DIR="build"
 
-PATH=`cygpath $ANDROID_SDK_ROOT`/ndk/21.4.7075529/toolchains/llvm/prebuilt/windows-x86_64/bin:$PATH
+PATH=`cygpath $ANDROID_SDK_ROOT`/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/bin:$PATH
 
 go_compile() {
   echo "[.] Compiling for ${1}:${2}..."

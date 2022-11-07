@@ -9,6 +9,6 @@ type ProvMeta struct {
 
 //easyjson:json
 type ProviderData struct {
- Meta ProvMeta             `json:"meta"`
  Data map[uint32][]string  `json:"data"`
+ Meta ProvMeta             `json:"meta"`
 }

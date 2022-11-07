@@ -14,6 +14,6 @@ func PrintMemUsage(s string) {
     return b / 1024 / 1024
 	}
   runtime.ReadMemStats(&m)
-  log.Printf("MEM [%s]: Alloc= %v, TotalAlloc= %v, Sys= %v, NumGC = %v",
+  log.Printf("MEM.%s: Alloc=%v, TotalAlloc= %v, Sys= %v, NumGC= %v",
     s, bToMb(m.Alloc), bToMb(m.TotalAlloc), bToMb(m.Sys), m.NumGC )
 }

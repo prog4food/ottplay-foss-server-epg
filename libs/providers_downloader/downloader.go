@@ -14,7 +14,7 @@ import (
 	ms "ottplay-foss-server-epg/libs/mem_storage"
 )
 
-var HttpClient *fasthttp.Client
+var HttpClient *fasthttp.Client = &fasthttp.Client{}
 
 func processProvider(ps *config_epg.ProviderSource, b []byte) {
   _body_hash := xxhash32.Checksum32(b)
