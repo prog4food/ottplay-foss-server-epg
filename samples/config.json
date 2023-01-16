@@ -1,8 +1,0 @@
-{
-  "bind": "127.0.0.1:3001",
-  "providers": [
-    {"id": "it999", "order_ico":90, "base_url": "http://ott-epg.prog4food.eu.org/it999/"},
-    {"id": "iptvx.one", "order_ico":91, "base_url": "http://ott-epg.prog4food.eu.org/iptvx.one/"},
-    {"id": "voc-tv", "order_ico":90, "base_url": "http://ott-epg.prog4food.eu.org/voc-tv/"}
-  ]
-}
