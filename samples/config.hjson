@@ -1,8 +1,14 @@
 {
-  /* Автоматические создаваемые файлы:
+  /* Автоматически создаваемые файлы:
     - channels_url.json
     - order_epg.json
     - order_ico.json
+    /i/ Если плеер без внешнего управления ссылками, то channels_url.json нужно создать руками, (TODO: или через api)
+    прописав в нем ссылку до каталога где находится channels.json, пример для конфига ниже:
+      {
+      "it999": "http://epg.ottp.eu.org/it999/",
+      "iptvx.one": "http://epg.ottp.eu.org/iptvx.one/"
+      }
   */
   bind: "127.0.0.1:3001" # интерфейс для входящих подключений
   base_url: "http://epg.ottp.eu.org/" # Базовый URL EPG, возвращается всем НЕ direct провайдерам, в виде "<base_url><provider.id>/"
