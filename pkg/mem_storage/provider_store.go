@@ -13,7 +13,6 @@ type EpgChannelData struct {
 	// Id         *string
 	// Names    []*string
 	LastEpg    int64
-	ExpiredEpg bool
 }
 type HashEpgStruct map[uint32]*EpgChannelData
 type ProviderEpgData struct {

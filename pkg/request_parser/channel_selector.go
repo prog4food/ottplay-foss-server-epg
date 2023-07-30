@@ -2,6 +2,7 @@ package request_parser
 
 import (
 	"bytes"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -39,6 +40,7 @@ func ParseAndLookup_Epg(in []byte, prov_list []*mem_storage.ProviderEpgData, pro
     ch_tid, ch_tname, ch_name uint32
     prov *mem_storage.ProviderEpgData
     search_step int8
+    _now_unix int64
   )
 
   // Ordered будет лежать в другом блоке памяти, удобно :)
@@ -49,12 +51,14 @@ func ParseAndLookup_Epg(in []byte, prov_list []*mem_storage.ProviderEpgData, pro
   err, ch_key_str, ch_tid, ch_tname, ch_name  = splitChannelData(in)
   if err != nil { goto err_bye }
 
+  _now_unix = time.Now().Unix()
+
   if (ch_tid != 0) && (prov_user_len > 0) {
     // Если список "кастомный", и есть tvg-id
     for i = 0; i < int(prov_user_len); i++ {
       prov = prov_list[i]
       ch, ok = prov.ById[ch_tid]
-      if ok && !ch.ExpiredEpg { search_step = 1; goto exit_ok }
+      if ok && ch.LastEpg > _now_unix { search_step = 1; goto exit_ok }
     }
   }
   if (ch_tname != 0) {
@@ -62,7 +66,7 @@ func ParseAndLookup_Epg(in []byte, prov_list []*mem_storage.ProviderEpgData, pro
     for i = 0; i < len(prov_list); i++ {
       prov = prov_list[i]
       ch, ok = prov.ByName[ch_tname]
-      if ok && !ch.ExpiredEpg { search_step = 2; goto exit_ok }
+      if ok && ch.LastEpg > _now_unix { search_step = 2; goto exit_ok }
     }
   }
   if (ch_name != 0) {
@@ -70,7 +74,7 @@ func ParseAndLookup_Epg(in []byte, prov_list []*mem_storage.ProviderEpgData, pro
     for i = 0; i < len(prov_list); i++ {
       prov = prov_list[i]
       ch, ok = prov.ByName[ch_name]
-      if ok && !ch.ExpiredEpg { search_step = 3; goto exit_ok }
+      if ok && ch.LastEpg > _now_unix { search_step = 3; goto exit_ok }
     }
   }
   // if (ch_tid != 0) {

@@ -107,9 +107,8 @@ func loadProvider(p *mem_storage.ProviderElement, b []byte) {
 				// Names:      make([]*string, 0, len(_payload)-1),
 				IdHash:     mem_storage.DedupByte(mem_storage.Ids, helpers.Uint32ToBytes(nil, _chIdHash)),
 				LastEpg:    last_epg,
-				ExpiredEpg: (last_epg < _now_unix),
 			}
-			if chEpg.ExpiredEpg {
+			if last_epg < _now_unix {
 				chExpired++
 			}
 			pEpg.ById[_chIdHash] = chEpg
