@@ -35,6 +35,10 @@ func Load() *ConfigFile {
 		conf.Bind = "127.0.0.1:3001"
 	}
 
+	// Параметры providers_default по-умолчанию
+	if conf.ProvidersDef.ChTTL == 0 { conf.ProvidersDef.ChTTL = 6 }
+	if conf.ProvidersDef.XmltvTTL == 0 { conf.ProvidersDef.XmltvTTL = 6 }
+
 	// Чтение провайдеров
 	var provIdHash uint32
 	for i := 0; i < len(conf.Providers); i++ {
@@ -50,10 +54,8 @@ func Load() *ConfigFile {
 		}
 		p.XmltvHashes[len_M3uUrls] = provIdHash
 
-		// Обновление списка каналов = 6 часов
-		if p.ChTTL == 0 {
-			p.ChTTL = 6
-		}
+		// Время автообновления channels.json
+		if p.ChTTL == 0 { p.ChTTL = conf.ProvidersDef.ChTTL }
 	}
 	return conf
 }

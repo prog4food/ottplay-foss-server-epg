@@ -23,6 +23,12 @@
     worker123
   ]
 
+  // Default значения для провайдеров
+  providers_default: {
+    channels_ttl: 6  // Интервал автоматической проверки обновлений channels.json (в часах) (def: 6)
+    xmltv_ttl:    6  // TODO: "Время отдыха" EPG(xmltv), после обновления в течение этого времени источник не проверяется (в часах) (def: 6)
+  }
+
   providers: [
     /* ==Список провайдеров
       - id: идентификатор провайдера
@@ -37,8 +43,8 @@
         - 64 : зарезервировано
         - 128: зарезервировано
         * - не реализовано
-      - channels_ttl: кол-во часов, автоматической проверки обновлений списка каналов (6)
-      - xmltv_ttl: кол-во часов, минимальной "жизни" epg после обновления (6)
+      - channels_ttl: см. providers_default.channels_ttl (def: providers_default.channels_ttl)
+      - xmltv_ttl: см. providers_default.xmltv_ttl (def: providers_default.xmltv_ttl)
       ! порядок сортировки наследует порядок из конфига, ручная сортировка задается в файлах order_epg, order_ico
     */
     { id: "it999", xmltv: [
