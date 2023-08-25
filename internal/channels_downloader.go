@@ -233,6 +233,10 @@ errDownload:
 	if p.ChURL == nil {
 		log.Warn().Msgf("channels.net: %s - empty ChUrl", p.Id)
 	} else {
-		log.Error().Err(err).Msgf("channels.net: %s - download error [%d, %s]", p.Id, r.StatusCode, p.ChUrl)
+		statusCode := 0
+		if r != nil {
+			statusCode = r.StatusCode
+		}
+		log.Error().Err(err).Msgf("channels.net: %s - download error [%d, %s]", p.Id, statusCode, p.ChUrl)
 	}
 }
