@@ -83,7 +83,6 @@ func Slice_AppendUniq[T *mem_storage.ProviderEpgData|*mem_storage.ProviderIcoDat
 
 // Дженерик сканирует блок с ссылками на XMLTV и переводит их в
 func PrioritizeUserProviders[T *mem_storage.ProviderEpgData|*mem_storage.ProviderIcoData](inData []byte, listGlobal []T, look_func func (uint32, []T)T) ([]T, uint8) {
-
   if len(inData) == 0 { return listGlobal, 0 }
 
   var hashUserXmltv uint32
@@ -91,9 +90,18 @@ func PrioritizeUserProviders[T *mem_storage.ProviderEpgData|*mem_storage.Provide
   var lenGlobal = len(listGlobal)
   var listUser  = make([]T, 0, lenGlobal)
   var provUser T
-  listUserRaw := bytes.Split(inData, c_sep_line)  // "\n"
-  for i := 0; i < len(listUserRaw); i++ {
-    hashUserXmltv = xxhash.Checksum32(listUserRaw[i])
+  var reqTvgUrls = bytes.Split(inData, c_sep_line)  // "\n"
+  var t []byte  // Временная строка для нормализации url-tvg
+  var l int     // Временная переменная для длины строки t
+  for i := 0; i < len(reqTvgUrls); i++ {
+    // Нормализация url-tvg
+    t = reqTvgUrls[i]
+    if l = len(t); l > 10 {   // http://a.co
+      t = helpers.CutURLb_gz(t, l) // первое, тк необходима l
+      t = helpers.CutHTTPb(t)
+    }
+
+    hashUserXmltv = xxhash.Checksum32(t)
     if hashUserXmltv == helpers.EmptyXXHash32 { continue }
 
     // Проверяем, знаем ли такого провайдера
@@ -103,7 +111,7 @@ func PrioritizeUserProviders[T *mem_storage.ProviderEpgData|*mem_storage.Provide
       listUser = Slice_AppendUniq(listUser, provUser)
     } else {
       // НЕ Знаем: Логируем его хеш и ссылку (частых можно будет добавлять)
-      log.Warn().Msgf("match.epg: unlisted provider - %d: %s", hashUserXmltv, listUserRaw[i])
+      log.Warn().Msgf("match.epg: unlisted provider - %d: %s", hashUserXmltv, reqTvgUrls[i])
     }
   }
 

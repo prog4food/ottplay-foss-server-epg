@@ -49,8 +49,16 @@ func Load() *ConfigFile {
 		// Хеширование всех M3uUrls + имя провайдера
 		len_M3uUrls = len(p.Xmltv)
 		p.XmltvHashes = make([]uint32, len_M3uUrls+1)
+		var t []byte  // Временная строка для нормализации url-tvg
+		var l int     // Временная переменная для длины строки t
 		for g := 0; g < len_M3uUrls; g++ {
-			p.XmltvHashes[g] = xxhash32.ChecksumString32(helpers.CutHTTP(p.Xmltv[g]))
+			t = helpers.S2b(p.Xmltv[g])
+			if l = len(t); l > 10 {   // http://a.co
+				t = helpers.CutURLb_gz(t, l) // первое, тк необходима l
+				t = helpers.CutHTTPb(t)
+			}
+
+			p.XmltvHashes[g] = xxhash32.Checksum32(t)
 		}
 		p.XmltvHashes[len_M3uUrls] = provIdHash
 
